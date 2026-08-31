@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#0F0F0F</color>
+    <color name="card">#1E1E1E</color>
+    <color name="safe">#00E676</color>
+    <color name="critical">#FF5252</color>
+    <color name="warning">#FFB74D</color>
+    <color name="medium">#FFA726</color>
+    <color name="high">#FF7043</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

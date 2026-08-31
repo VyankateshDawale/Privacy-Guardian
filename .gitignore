@@ -1,0 +1,17 @@
+# Gradle
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+# Android
+*.apk
+*.aab
+!app/build/outputs/apk/debug/app-debug.apk
+# OS
+.DS_Store
+Thumbs.db
+# Keystore
+*.jks
+*.keystore
