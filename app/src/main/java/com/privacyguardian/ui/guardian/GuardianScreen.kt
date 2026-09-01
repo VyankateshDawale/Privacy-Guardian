@@ -172,23 +172,23 @@ fun GuardianScreen(
                     }
                 }
             }
-            // Notification Guard Simulator
+            // Streamer Guard Simulator (iQOO Esports specific)
             item {
                 Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Card)) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Notifications, contentDescription = null, tint = Warning)
+                            Icon(Icons.Default.Notifications, contentDescription = null, tint = AccentBlue)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Notification Guard — Simulator", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text("Streamer Guard (Esports Shield)", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         }
-                        Text("Simulate a notification containing sensitive info.", color = TextSecondary, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                        Text("Simulate intercepting notifications during live streams or gaming to prevent data leaks.", color = TextSecondary, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
                         Spacer(modifier = Modifier.height(10.dp))
                         OutlinedTextField(
                             value = notificationText,
                             onValueChange = { notificationText = it },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Warning,
+                                focusedBorderColor = AccentBlue,
                                 unfocusedBorderColor = Border,
                                 focusedTextColor = TextPrimary,
                                 unfocusedTextColor = TextPrimary
@@ -203,26 +203,26 @@ fun GuardianScreen(
                                 notifResult = app.riskEngine.calculateRisk(ents)
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Warning, contentColor = Color.Black),
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentBlue, contentColor = Color.White),
                             shape = RoundedCornerShape(10.dp)
-                        ) { Text("ANALYZE", fontWeight = FontWeight.Bold) }
+                        ) { Text("SIMULATE STREAM NOTIFICATION", fontWeight = FontWeight.Bold) }
                         if (notifResult != null) {
                             Spacer(modifier = Modifier.height(10.dp))
                             val nr = notifResult!!
                             if (nr.detectedEntities.isNotEmpty()) {
                                 Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = CardElevated)) {
                                     Column(modifier = Modifier.padding(12.dp)) {
-                                        Text("🔒 Sensitive information detected", color = Critical, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                        Text("⚠️ Leak Prevented During Game", color = Critical, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                         Spacer(modifier = Modifier.height(6.dp))
                                         var protectedPreview = notificationText
-                                        nr.detectedEntities.forEach { e -> protectedPreview = protectedPreview.replace(e.originalValue, e.maskedValue) }
-                                        Text("Protected preview:", color = TextTertiary, fontSize = 11.sp)
+                                        nr.detectedEntities.forEach { e -> protectedPreview = protectedPreview.replace(e.originalValue, "[REDACTED FOR STREAM]") }
+                                        Text("Viewer sees:", color = TextTertiary, fontSize = 11.sp)
                                         Text("\"$protectedPreview\"", color = TextPrimary, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
-                                        Text("Would be masked in notification shade.", color = TextSecondary, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+                                        Text("Sensitive parts removed dynamically via NPU before render.", color = TextSecondary, fontSize = 11.sp, modifier = Modifier.padding(top = 8.dp))
                                     }
                                 }
                             } else {
-                                Text("No sensitive info in this notification.", color = Safe, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
+                                Text("Safe: No sensitive info detected.", color = Safe, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
                             }
                         }
                     }

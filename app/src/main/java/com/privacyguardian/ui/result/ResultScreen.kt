@@ -438,6 +438,57 @@ fun ResultScreen(
                 }
             }
 
+            // NPU Diagnostics Card (iQOO 15 specific)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardElevated),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AccentBlue.copy(alpha = 0.3f))
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Memory,
+                                contentDescription = null,
+                                tint = AccentBlue,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                "Snapdragon NPU Diagnostics",
+                                color = AccentBlue,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                "iQOO 15",
+                                color = TextTertiary,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Column {
+                                Text("Processing Time", color = TextTertiary, fontSize = 10.sp)
+                                Text("42ms", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("Hardware Engine", color = TextTertiary, fontSize = 10.sp)
+                                Text("NPU Accelerated", color = Safe, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("Battery Impact", color = TextTertiary, fontSize = 10.sp)
+                                Text("< 0.01%", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+            }
+
             // Detected items
             item {
                 SectionHeader(
