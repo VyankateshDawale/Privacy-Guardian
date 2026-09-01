@@ -19,11 +19,28 @@ class ProtectionEngine(private val context: Context) {
         style = Paint.Style.FILL
     }
 
+    private val smartBgPaint = Paint().apply {
+        color = 0xFFF1F5F9.toInt()
+        style = Paint.Style.FILL
+    }
+    private val smartBorderPaint = Paint().apply {
+        color = 0xFF0E9F6E.toInt()
+        style = Paint.Style.STROKE
+        strokeWidth = 3f
+    }
+    private val smartTextPaint = Paint().apply {
+        color = 0xFF0F172A.toInt()
+        textSize = 28f
+        isAntiAlias = true
+        isFakeBoldText = true
+    }
+
     private val paddingPx = 8
 
     fun createProtectedBitmap(
         original: Bitmap,
-        entities: List<SensitiveEntity>
+        entities: List<SensitiveEntity>,
+        smartMask: Boolean = false
     ): Bitmap {
         // Never mutate original
         val mutable = original.copy(Bitmap.Config.ARGB_8888, true)
@@ -38,7 +55,21 @@ class ProtectionEngine(private val context: Context) {
                 (box.right + paddingPx).coerceAtMost(mutable.width),
                 (box.bottom + paddingPx).coerceAtMost(mutable.height)
             )
-            canvas.drawRect(padded, rectPaint)
+            if (smartMask) {
+                // Smart Mask: keep structure, show maskedValue
+                canvas.drawRect(padded, smartBgPaint)
+                canvas.drawRect(padded, smartBorderPaint)
+                // Draw masked text centered if box large enough
+                val text = entity.maskedValue.take(20)
+                val textWidth = smartTextPaint.measureText(text)
+                if (padded.width() > textWidth + 10 && padded.height() > 20) {
+                    val x = padded.left + (padded.width() - textWidth) / 2f
+                    val y = padded.centerY() + 8f
+                    canvas.drawText(text, x, y, smartTextPaint)
+                }
+            } else {
+                canvas.drawRect(padded, rectPaint)
+            }
         }
         return mutable
     }
@@ -92,14 +123,15 @@ class ProtectionEngine(private val context: Context) {
     suspend fun protectAndSave(
         original: Bitmap,
         entities: List<SensitiveEntity>,
-        fullText: String = ""
+        fullText: String = "",
+        smartMask: Boolean = false
     ): Pair<Bitmap, Uri> {
         val protected = if (entities.any { it.boundingBox != null }) {
-            createProtectedBitmap(original, entities)
+            createProtectedBitmap(original, entities, smartMask)
         } else {
             createProtectedBitmapWithNoBoxesFallback(original, entities, fullText)
         }
-        val uri = saveBitmapToCache(protected)
+        val uri = saveBitmapToCache(protected, if (smartMask) "protected_smart_${UUID.randomUUID()}.png" else "protected_${UUID.randomUUID()}.png")
         return protected to uri
     }
 }

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Shield
@@ -41,7 +41,7 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Settings", color = TextPrimary, fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary) } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
             )
         },
@@ -70,7 +70,7 @@ fun SettingsScreen(
                     color = TextSecondary, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp)
                 )
             }
-            item { Divider(color = Border) }
+            item { HorizontalDivider(color = Border) }
             item {
                 Text("Privacy", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -78,7 +78,7 @@ fun SettingsScreen(
                 SettingRow(Icons.Default.Shield, localStatus, "Rule-based fallback ensures reliability if local model unavailable. Raw secrets never logged, persisted, or sent to cloud.")
                 SettingRow(Icons.Default.PhoneAndroid, "History storage", "Only masked metadata and protected image Uris are stored in Room. Original images, raw OCR text, and raw secrets are never persisted.")
             }
-            item { Divider(color = Border) }
+            item { HorizontalDivider(color = Border) }
             item {
                 Text("About", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -129,3 +129,6 @@ private fun SettingRow(icon: androidx.compose.ui.graphics.vector.ImageVector, ti
         }
     }
 }
+
+
+

@@ -22,8 +22,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.privacyguardian.PrivacyGuardianApp
 import com.privacyguardian.ui.components.*
 import com.privacyguardian.ui.navigation.Screen
+import com.privacyguardian.ui.onboarding.OnboardingBottomSheet
 import com.privacyguardian.ui.scanner.ScanViewModel
 import com.privacyguardian.ui.theme.*
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,6 +42,12 @@ fun HomeScreen(
     LaunchedEffect(Unit) { vm.refreshRecent() }
     val state by vm.state.collectAsState()
     var showOnDeviceSheet by remember { mutableStateOf(false) }
+    var showOnboarding by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        app.preferencesManager.hasSeenOnboarding.collect { seen ->
+            showOnboarding = !seen
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -164,6 +172,14 @@ fun HomeScreen(
                 Text("Designed for iQOO 15 — fast local processing so privacy protection feels instant.", color = TextSecondary, fontSize = 12.sp)
             }
         }
+    }
+
+    if (showOnboarding) {
+        val scope = rememberCoroutineScope()
+        OnboardingBottomSheet(onDismiss = {
+            showOnboarding = false
+            scope.launch { app.preferencesManager.setOnboardingSeen(true) }
+        })
     }
 }
 

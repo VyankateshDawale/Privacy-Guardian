@@ -4,12 +4,14 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -60,7 +62,7 @@ fun ResultScreen(
             TopAppBar(
                 title = { Text("Privacy Scan Complete", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background),
                 actions = {
@@ -290,7 +292,7 @@ fun ResultScreen(
                         Text("Confidence: ${(entity.confidence*100).toInt()}% • ${entity.context}", color = TextTertiary, fontSize = 11.sp, modifier = Modifier.padding(top = 2.dp))
                         if (isExpanded) {
                             Spacer(modifier = Modifier.height(10.dp))
-                            Divider(color = Border, thickness = 1.dp)
+                            HorizontalDivider(color = Border, thickness = 1.dp)
                             Spacer(modifier = Modifier.height(10.dp))
                             Text("WHY IS THIS RISKY?", color = Warning, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             Text(entity.explanation, color = TextSecondary, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
@@ -314,25 +316,55 @@ fun ResultScreen(
                                 Text("→", color = TextTertiary, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 8.dp))
                                 Text(com.privacyguardian.detection.DetectionPatterns.whatCanLeakFor(e.type), color = TextSecondary, fontSize = 12.sp, modifier = Modifier.weight(1f))
                             }
-                            if (e != entities.last()) Divider(color = Border, modifier = Modifier.padding(vertical = 4.dp))
+                            if (e != entities.last()) HorizontalDivider(color = Border, modifier = Modifier.padding(vertical = 4.dp))
                         }
                         Text("All exposures are potential — cautious language: may, could.", color = TextTertiary, fontSize = 10.sp, modifier = Modifier.padding(top = 8.dp))
                     }
                 }
             }
 
-            // Actions
+            // Smart Mask vs Full Redaction toggle (P2 nice to have — now functional)
             item {
                 if (state.protectedBitmap == null) {
+                    var smartMask by remember { mutableStateOf(false) }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Card)
+                            .border(1.dp, Border, RoundedCornerShape(12.dp))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        FilterChip(
+                            selected = !smartMask,
+                            onClick = { smartMask = false },
+                            label = { Text("FULL REDACTION", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Safe, selectedLabelColor = Color.White),
+                            modifier = Modifier.weight(1f)
+                        )
+                        FilterChip(
+                            selected = smartMask,
+                            onClick = { smartMask = true },
+                            label = { Text("SMART MASK", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = AccentBlue, selectedLabelColor = Color.White),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        if (smartMask) "Smart Mask keeps structure (j***@iqoo.com) while hiding dangerous content." else "Full Redaction blackouts entire sensitive region — most secure for demo.",
+                        color = TextTertiary, fontSize = 11.sp, modifier = Modifier.padding(bottom = 8.dp)
+                    )
                     Button(
-                        onClick = { scanViewModel.protectCurrent(context) },
+                        onClick = { scanViewModel.protectCurrent(context, smartMask) },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Safe, contentColor = Color.Black),
+                        colors = ButtonDefaults.buttonColors(containerColor = Safe, contentColor = Color.White),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(Icons.Default.Shield, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("PROTECT & SAVE", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Text(if (smartMask) "SMART PROTECT & SAVE" else "PROTECT & SAVE", fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedButton(
@@ -403,3 +435,6 @@ fun ResultScreen(
         }
     }
 }
+
+
+

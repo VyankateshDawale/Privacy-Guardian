@@ -1,5 +1,7 @@
 package com.privacyguardian.ui.history
 
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,6 +9,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +37,8 @@ fun HistoryScreen(
 ) {
     val items by vm.items.collectAsState()
     var showClearDialog by remember { mutableStateOf(false) }
+    var selectedItem by remember { mutableStateOf<com.privacyguardian.data.local.ScanHistoryEntity?>(null) }
+    val context = LocalContext.current
     LaunchedEffect(Unit) { vm.init(app) }
 
     Scaffold(
@@ -63,7 +69,7 @@ fun HistoryScreen(
             ) {
                 items(items) { item ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().clickable { selectedItem = item },
                         shape = RoundedCornerShape(14.dp),
                         colors = CardDefaults.cardColors(containerColor = Card)
                     ) {
@@ -121,6 +127,77 @@ fun HistoryScreen(
             },
             containerColor = Card
         )
+    }
+
+    if (selectedItem != null) {
+        val item = selectedItem!!
+        ModalBottomSheet(onDismissRequest = { selectedItem = null }) {
+            Column(modifier = Modifier.padding(20.dp).padding(bottom = 30.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Visibility, contentDescription = null, tint = Safe, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Scan Detail", color = TextPrimary, fontWeight = FontWeight.Black, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.weight(1f))
+                    RiskBadge(
+                        when (item.riskLevel) {
+                            "CRITICAL" -> com.privacyguardian.domain.model.RiskLevel.CRITICAL
+                            "HIGH" -> com.privacyguardian.domain.model.RiskLevel.HIGH
+                            "MEDIUM" -> com.privacyguardian.domain.model.RiskLevel.MEDIUM
+                            "LOW" -> com.privacyguardian.domain.model.RiskLevel.LOW
+                            else -> com.privacyguardian.domain.model.RiskLevel.SAFE
+                        }
+                    )
+                }
+                Text(item.detectionType.ifEmpty { "Scan" }, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text("${item.riskLevel} • ${item.action} • ${item.itemCount} item(s) • ${formatDate(item.timestamp)}", color = TextSecondary, fontSize = 12.sp)
+                Text("Risk: ${item.riskScore}/100", color = when (item.riskLevel) {
+                    "CRITICAL" -> Critical
+                    "HIGH" -> HighRisk
+                    "MEDIUM" -> MediumRisk
+                    else -> Safe
+                }, fontWeight = FontWeight.Black, fontSize = 14.sp)
+                if (item.protectedImageUri != null) {
+                    Text("Protected Image", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    AsyncImage(
+                        model = item.protectedImageUri,
+                        contentDescription = "Protected",
+                        modifier = Modifier.fillMaxWidth().height(220.dp).clip(RoundedCornerShape(12.dp))
+                    )
+                    Button(
+                        onClick = {
+                            try {
+                                val uri = android.net.Uri.parse(item.protectedImageUri)
+                                val share = Intent(Intent.ACTION_VIEW).apply {
+                                    setDataAndType(uri, "image/*")
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                context.startActivity(share)
+                            } catch (_: Exception) {}
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = CardElevated, contentColor = TextPrimary)
+                    ) { Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(modifier = Modifier.width(6.dp)); Text("View Full") }
+                    Button(
+                        onClick = {
+                            try {
+                                val uri = android.net.Uri.parse(item.protectedImageUri)
+                                val share = Intent(Intent.ACTION_SEND).apply {
+                                    type = "image/png"
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                context.startActivity(Intent.createChooser(share, "Share Safe Copy"))
+                            } catch (_: Exception) {}
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Safe, contentColor = androidx.compose.ui.graphics.Color.White)
+                    ) { Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(modifier = Modifier.width(6.dp)); Text("Share Safe Copy", fontWeight = FontWeight.Bold) }
+                } else {
+                    Text("No protected image — text/document scan (masked text not persisted per privacy).", color = TextSecondary, fontSize = 12.sp)
+                }
+                Text("Privacy: raw image, OCR text, secrets never stored — only masked metadata & protected Uri.", color = TextTertiary, fontSize = 11.sp)
+            }
+        }
     }
 }
 

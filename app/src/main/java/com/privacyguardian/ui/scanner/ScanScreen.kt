@@ -18,9 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.privacyguardian.PrivacyGuardianApp
 import com.privacyguardian.ui.components.*
 import com.privacyguardian.ui.theme.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +40,28 @@ fun ScanScreen(
     var showDocPicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { scanViewModel.init(app) }
+
+    var cameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && cameraUri != null) {
+            scanViewModel.scanUri(context, cameraUri!!)
+            onResult()
+        } else if (!success) {
+            Toast.makeText(context, "Camera capture cancelled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val requestCameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            val file = File(context.cacheDir, "camera_${System.currentTimeMillis()}.jpg")
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            cameraUri = uri
+            takePictureLauncher.launch(uri)
+        } else {
+            Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         if (uri != null) {
@@ -102,6 +126,11 @@ fun ScanScreen(
                 QuickActionCard(Icons.Default.Image, "Scan Image", "Any image containing text", {
                     photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }, Safe)
+            }
+            item {
+                QuickActionCard(Icons.Default.PhotoCamera, "Camera Scanner", "Capture → OCR → Protect (on-device)", {
+                    requestCameraPermission.launch(android.Manifest.permission.CAMERA)
+                }, AccentBlue)
             }
             item {
                 QuickActionCard(Icons.Default.Description, "Scan Document", "Text files (MVP)", {

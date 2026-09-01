@@ -257,17 +257,17 @@ class ScanViewModel : ViewModel() {
         }
     }
 
-    fun protectCurrent(context: Context) {
+    fun protectCurrent(context: Context, smartMask: Boolean = false) {
         val s = _state.value
         val bmp = s.originalBitmap ?: return
         val entities = s.riskResult?.detectedEntities ?: return
         if (entities.isEmpty()) return
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, stage = "Protecting")
+            _state.value = _state.value.copy(isLoading = true, stage = if (smartMask) "Smart masking" else "Protecting")
             try {
                 val engine = app?.protectionEngine() ?: ProtectionEngine(context)
                 val (protectedBmp, uri) = withContext(Dispatchers.IO) {
-                    engine.protectAndSave(bmp, entities, s.ocrResult?.fullText ?: "")
+                    engine.protectAndSave(bmp, entities, s.ocrResult?.fullText ?: "", smartMask)
                 }
                 _state.value = _state.value.copy(isLoading = false, protectedBitmap = protectedBmp, protectedUri = uri, stage = "Protected")
                 // Save history with protected uri
