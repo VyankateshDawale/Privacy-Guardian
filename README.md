@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
   <img src="https://img.icons8.com/color/96/000000/security-checked--v1.png" width="96" height="96" alt="Privacy Guardian Logo"/>
   <h1>Privacy Guardian</h1>
   <p><b>Next-Generation On-Device Privacy Shield — Built for the iQOO Hackathon</b></p>
@@ -56,14 +56,14 @@ Physical privacy matters. Tapping the **Panic Protocol** button triggers an asyn
 
 ---
 
-## 📥 Installation & Demo
+## 📥 Direct Download & Installation
 
-A pre-compiled APK is available in the root of this repository.
+<div align="center">
+  <a href="https://github.com/VyankateshDawale/Privacy-Guardian/raw/main/PrivacyGuardian-iQOO-Hackathon.apk">
+    <img src="https://img.shields.io/badge/Download_APK-Click_Here-00C853?style=for-the-badge&logo=android" alt="Download APK" />
+  </a>
+</div>
 
-1. Download the [PrivacyGuardian-iQOO-Hackathon.apk](./PrivacyGuardian-iQOO-Hackathon.apk) from the root of this repo to your Android device.
-2. Install the APK (You may need to allow "Install from Unknown Sources").
-3. **To Test Ghost Mode:** Navigate to the "Active Shields" tab and paste a fake password or API key into the Test Environment.
-4. **To Test OCR:** Click "Demo Engine" on the Home Screen to see the ML Vision risk-scoring in action on a pre-loaded image.
-
----
+1. Click the button above to download the compiled PrivacyGuardian-iQOO-Hackathon.apk directly to your Android device.
+2. Install the APK (You may need to allow "Install from Unknown Sources" in your device settings).---
 *Developed for the iQOO Hackathon.*
