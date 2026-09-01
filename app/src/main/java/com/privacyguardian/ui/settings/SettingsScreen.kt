@@ -1,4 +1,4 @@
-package com.privacyguardian.ui.settings
+﻿package com.privacyguardian.ui.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -102,9 +102,9 @@ fun SettingsScreen(
                         
                         // iQOO 15 Badge
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
-                            Icon(Icons.Default.Star, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Star, contentDescription = null, tint = AccentIqoo, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Designed for iQOO 15 Optimized AI", color = AccentBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Designed for iQOO 15 Optimized AI", color = AccentIqoo, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
 
                         Text("Version 1.0 • Hackathon Prototype • iQOO 15", color = TextTertiary, fontSize = 11.sp)

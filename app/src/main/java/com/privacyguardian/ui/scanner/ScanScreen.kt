@@ -1,4 +1,4 @@
-package com.privacyguardian.ui.scanner
+﻿package com.privacyguardian.ui.scanner
 
 import android.net.Uri
 import android.widget.Toast
@@ -130,7 +130,7 @@ fun ScanScreen(
             item {
                 QuickActionCard(Icons.Default.PhotoCamera, "Camera Scanner", "Capture → OCR → Protect (on-device)", {
                     requestCameraPermission.launch(android.Manifest.permission.CAMERA)
-                }, AccentBlue)
+                }, AccentIqoo)
             }
             item {
                 QuickActionCard(Icons.Default.Description, "Scan Document", "Text files (MVP)", {

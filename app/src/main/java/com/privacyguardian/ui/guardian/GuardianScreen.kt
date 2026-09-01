@@ -1,4 +1,4 @@
-package com.privacyguardian.ui.guardian
+﻿package com.privacyguardian.ui.guardian
 
 import android.content.Intent
 import android.net.Uri
@@ -177,7 +177,7 @@ fun GuardianScreen(
                 Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Card)) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Notifications, contentDescription = null, tint = AccentBlue)
+                            Icon(Icons.Default.Notifications, contentDescription = null, tint = AccentIqoo)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Streamer Guard (Esports Shield)", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         }
@@ -188,7 +188,7 @@ fun GuardianScreen(
                             onValueChange = { notificationText = it },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = AccentBlue,
+                                focusedBorderColor = AccentIqoo,
                                 unfocusedBorderColor = Border,
                                 focusedTextColor = TextPrimary,
                                 unfocusedTextColor = TextPrimary
@@ -203,7 +203,7 @@ fun GuardianScreen(
                                 notifResult = app.riskEngine.calculateRisk(ents)
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = AccentBlue, contentColor = Color.White),
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentIqoo, contentColor = Color.White),
                             shape = RoundedCornerShape(10.dp)
                         ) { Text("SIMULATE STREAM NOTIFICATION", fontWeight = FontWeight.Bold) }
                         if (notifResult != null) {

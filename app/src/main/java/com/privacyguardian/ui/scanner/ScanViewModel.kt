@@ -343,7 +343,12 @@ class ScanViewModel : ViewModel() {
 
                 if (risk != null) {
                     app?.preferencesManager?.setLastRiskScore(risk.score)
-                    if (entities.isNotEmpty() || risk.score > 0) {
+                    
+                    if (risk.riskLevel == com.privacyguardian.domain.model.RiskLevel.CRITICAL || risk.riskLevel == com.privacyguardian.domain.model.RiskLevel.HIGH) {
+                        triggerHapticFeedback(context)
+                    }
+
+                    if (entities.isNotEmpty()) {
                         val detectionType = entities.take(2).joinToString(", ") { it.type.name }.ifEmpty { "Clean" }
                         app?.scanHistoryRepository?.insert(
                             ScanHistoryEntity(
@@ -398,6 +403,9 @@ class ScanViewModel : ViewModel() {
                 )
                 if (risk != null) {
                     app?.preferencesManager?.setLastRiskScore(risk.score)
+                    
+
+
                     if (entities.isNotEmpty()) {
                         app?.scanHistoryRepository?.insert(
                             ScanHistoryEntity(
@@ -496,6 +504,26 @@ class ScanViewModel : ViewModel() {
             val risk = riskEngine?.calculateRisk(entities)
             _state.value = _state.value.copy(ocrResult = ocr, riskResult = risk, originalBitmap = bitmap, isLoading = false)
             onResult(entities.isNotEmpty() && (risk?.score ?: 0) >= 35)
+        }
+    }
+
+    private fun triggerHapticFeedback(context: Context) {
+        try {
+            val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
+                vibratorManager.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+            }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                vibrator.vibrate(android.os.VibrationEffect.createOneShot(150, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(150)
+            }
+        } catch (e: Exception) {
+            // Ignore if vibration fails
         }
     }
 }

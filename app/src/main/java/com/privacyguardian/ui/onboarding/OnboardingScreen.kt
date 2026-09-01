@@ -1,4 +1,4 @@
-package com.privacyguardian.ui.onboarding
+﻿package com.privacyguardian.ui.onboarding
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -46,14 +46,14 @@ fun OnboardingScreen(
             "Detect",
             "Find hidden risks",
             "On-device OCR scans screenshots, images & documents for API keys, passwords, OTP, cards, IDs — without uploading to cloud.",
-            listOf(Safe, AccentBlue)
+            listOf(Safe, AccentIqoo)
         ),
         OnboardingPage(
             Icons.Default.AutoAwesome,
             "Understand",
             "Context-aware, not just regex",
             "Your OTP is 482913 → Critical. Order #482913 → harmless. We understand context before raising alarms.",
-            listOf(AccentBlue, AccentPurple)
+            listOf(AccentIqoo, AccentPurple)
         ),
         OnboardingPage(
             Icons.Default.Shield,

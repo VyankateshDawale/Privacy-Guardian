@@ -1,4 +1,4 @@
-package com.privacyguardian.ui.theme
+﻿package com.privacyguardian.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
@@ -10,7 +10,7 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     primaryContainer = SafeLight,
     onPrimaryContainer = TextPrimary,
-    secondary = AccentBlue,
+    secondary = AccentIqoo,
     onSecondary = Color.White,
     tertiary = AccentPurple,
     onTertiary = Color.White,

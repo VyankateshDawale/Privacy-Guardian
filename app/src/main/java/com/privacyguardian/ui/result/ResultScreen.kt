@@ -1,4 +1,4 @@
-package com.privacyguardian.ui.result
+﻿package com.privacyguardian.ui.result
 
 import android.content.Intent
 import android.widget.Toast
@@ -444,20 +444,20 @@ fun ResultScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = CardElevated),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, AccentBlue.copy(alpha = 0.3f))
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AccentIqoo.copy(alpha = 0.3f))
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 Icons.Default.Memory,
                                 contentDescription = null,
-                                tint = AccentBlue,
+                                tint = AccentIqoo,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 "Snapdragon NPU Diagnostics",
-                                color = AccentBlue,
+                                color = AccentIqoo,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp
                             )
@@ -731,7 +731,7 @@ fun ResultScreen(
                                 onClick = { smartMask = true },
                                 label = { Text("SMART MASK", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = AccentBlue,
+                                    selectedContainerColor = AccentIqoo,
                                     selectedLabelColor = Color.White
                                 ),
                                 modifier = Modifier.weight(1f)

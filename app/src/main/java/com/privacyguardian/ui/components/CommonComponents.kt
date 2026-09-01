@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -228,7 +229,7 @@ fun GuardianModeSelector(selected: com.privacyguardian.domain.model.GuardianMode
     ) {
         com.privacyguardian.domain.model.GuardianMode.values().forEach { mode ->
             val isSelected = mode == selected
-            val bg = if (isSelected) Brush.linearGradient(listOf(Safe, AccentBlue)) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+            val bg = if (isSelected) Brush.linearGradient(listOf(Safe, AccentIqoo)) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
             val scale by animateFloatAsState(if (isSelected) 1f else 0.95f, tween(200), label = "mode")
             Box(
                 modifier = Modifier
@@ -333,7 +334,7 @@ fun ExposureCard(score: Int, level: RiskLevel, critical: Int, high: Int, medium:
                                         RiskLevel.CRITICAL -> listOf(Critical, HighRisk)
                                         RiskLevel.HIGH -> listOf(HighRisk, MediumRisk)
                                         RiskLevel.MEDIUM -> listOf(MediumRisk, Warning)
-                                        else -> listOf(Safe, AccentBlue)
+                                        else -> listOf(Safe, AccentIqoo)
                                     }
                                 )
                             )
@@ -392,45 +393,38 @@ fun OnDeviceBadge(onClick: () -> Unit) {
     }
 }
 
+
 @Composable
-fun LoadingState(text: String = "Analyzing…") {
-    val shimmer by rememberInfiniteTransition(label = "loadShimmer").animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(900, easing = LinearEasing)), label = "shimmer"
+fun LoadingState(text: String = "Analyzing...") {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.5f, targetValue = 2f,
+        animationSpec = infiniteRepeatable(tween(1200, easing = LinearOutSlowInEasing)), label = "scale"
     )
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f, targetValue = 0f,
+        animationSpec = infiniteRepeatable(tween(1200, easing = LinearOutSlowInEasing)), label = "alpha"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp),
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(56.dp)) {
-            CircularProgressIndicator(
-                progress = { shimmer },
-                modifier = Modifier.fillMaxSize(),
-                color = Safe,
-                trackColor = Border,
-                strokeWidth = 4.dp
-            )
-            Icon(Icons.Default.Memory, contentDescription = null, tint = Safe, modifier = Modifier.size(20.dp))
-        }
-        Spacer(modifier = Modifier.height(14.dp))
-        Text(text, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        Text("On-device • Private • Fast", color = TextTertiary, fontSize = 11.sp)
-        Spacer(modifier = Modifier.height(10.dp))
-        // Animated dots
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            repeat(3) { i ->
-                val alpha by rememberInfiniteTransition(label = "dot").animateFloat(
-                    initialValue = 0.3f, targetValue = 1f,
-                    animationSpec = infiniteRepeatable(
-                        tween(600, delayMillis = i * 200, easing = FastOutSlowInEasing),
-                        RepeatMode.Reverse
-                    ), label = "dot$i"
-                )
-                Box(modifier = Modifier.size(7.dp).clip(CircleShape).background(Safe.copy(alpha = alpha)))
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
+            // Pulsing radar rings
+            Box(modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = scale, scaleY = scale, alpha = alpha).border(2.dp, AccentIqoo, CircleShape))
+            Box(modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = scale * 0.7f, scaleY = scale * 0.7f, alpha = alpha).background(AccentIqoo.copy(alpha=0.3f), CircleShape))
+            
+            // Central Icon
+            Box(modifier = Modifier.size(48.dp).background(Card, CircleShape).border(2.dp, AccentIqoo, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Memory, contentDescription = null, tint = AccentIqoo, modifier = Modifier.size(24.dp))
             }
         }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(text, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        Text("iQOO 15 NPU AI processing...", color = TextTertiary, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
     }
 }
 
