@@ -21,10 +21,9 @@ class MlKitOcrEngine : OcrEngine {
             }
             val image = InputImage.fromBitmap(bitmap, 0)
             val visionText = recognizer.process(image).await()
-            val fullText = visionText.text ?: ""
+            val fullText = visionText.text
 
             if (fullText.isBlank()) {
-                // Return empty but success with no text flag handled upstream
                 return Result.success(
                     OcrResult(
                         fullText = "",
@@ -36,30 +35,39 @@ class MlKitOcrEngine : OcrEngine {
             }
 
             val elements = mutableListOf<OcrElement>()
+            // Track seen texts to avoid exact duplicates
+            val seenTexts = mutableSetOf<String>()
+
             for (block in visionText.textBlocks) {
                 for (line in block.lines) {
+                    // Add line-level element (for multi-word sensitive data spanning a line)
+                    val lineText = line.text
+                    val lineBox = line.boundingBox?.let { Rect(it) }
+                    if (lineText.isNotBlank()) {
+                        val key = "${lineText}_${lineBox?.left}_${lineBox?.top}"
+                        if (seenTexts.add(key)) {
+                            elements.add(OcrElement(lineText, lineBox))
+                        }
+                    }
+                    // Add word-level elements for precise bounding boxes
                     for (element in line.elements) {
-                        val text = element.text ?: continue
-                        val box = element.boundingBox?.let { Rect(it) }
-                        elements.add(OcrElement(text, box))
-                    }
-                    // Also add line bounding box for broader coverage
-                    // If line element not split, keep line text
-                }
-                // Fallback: also capture lines
-                for (line in block.lines) {
-                    val box = line.boundingBox?.let { Rect(it) }
-                    // Avoid duplicate if element already covers same text
-                    if (line.text.isNotBlank()) {
-                        // Don't duplicate single word lines heavily; but keep for bbox mapping
+                        val elemText = element.text
+                        val elemBox = element.boundingBox?.let { Rect(it) }
+                        if (elemText.isNotBlank()) {
+                            val key = "${elemText}_${elemBox?.left}_${elemBox?.top}"
+                            if (seenTexts.add(key)) {
+                                elements.add(OcrElement(elemText, elemBox))
+                            }
+                        }
                     }
                 }
-            }
-            // If elements empty but we have text, create pseudo elements per line
-            if (elements.isEmpty() && fullText.isNotBlank()) {
-                for (block in visionText.textBlocks) {
-                    for (line in block.lines) {
-                        elements.add(OcrElement(line.text ?: "", line.boundingBox?.let { Rect(it) }))
+                // Also add block-level for very long values (e.g. JWT across block)
+                val blockText = block.text
+                val blockBox = block.boundingBox?.let { Rect(it) }
+                if (blockText.isNotBlank() && blockText.length > 20) {
+                    val key = "${blockText.take(40)}_block"
+                    if (seenTexts.add(key)) {
+                        elements.add(OcrElement(blockText, blockBox))
                     }
                 }
             }
@@ -80,9 +88,7 @@ class MlKitOcrEngine : OcrEngine {
     override suspend fun recognize(uri: Uri, loadBitmap: suspend (Uri) -> Bitmap?): Result<OcrResult> {
         return try {
             val bitmap = loadBitmap(uri) ?: return Result.failure(IllegalArgumentException("Unable to load image"))
-            val result = recognize(bitmap)
-            // Caller handles bitmap recycling if needed; we don't recycle here
-            result
+            recognize(bitmap)
         } catch (e: Exception) {
             Result.failure(e)
         }
