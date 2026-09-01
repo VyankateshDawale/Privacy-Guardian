@@ -127,7 +127,9 @@ class SensitiveDataDetectorTest {
     fun contextEngine_exampleReducesRisk() {
         val ctx = ContextEngine.evaluate("Example API_KEY=YOUR_KEY_HERE", SensitiveType.API_KEY, "YOUR_KEY_HERE", "Example API_KEY=YOUR_KEY_HERE is placeholder")
         assertTrue(ctx.isExample)
-        assertTrue(ctx.confidenceMultiplier < 0.5f)
+        // Updated logic: demo placeholder now 0.7x / -15 (not 0.3x / -40) to keep demo critical but still reduced
+        assertTrue(ctx.confidenceMultiplier < 0.8f)
+        assertTrue(ctx.confidenceMultiplier < 1.0f)
     }
 
     @Test
