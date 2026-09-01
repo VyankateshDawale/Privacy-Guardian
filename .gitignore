@@ -1,4 +1,4 @@
-# Gradle
+﻿# Gradle
 .gradle/
 build/
 app/build/
@@ -8,8 +8,8 @@ local.properties
 # Android
 *.apk
 *.aab
-!app/build/outputs/apk/debug/app-debug.apk
-!app-debug.apk
+
+!PrivacyGuardian-iQOO-Hackathon.apk
 # OS
 .DS_Store
 Thumbs.db
