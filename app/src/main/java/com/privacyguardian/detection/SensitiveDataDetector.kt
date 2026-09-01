@@ -28,24 +28,43 @@ class SensitiveDataDetector {
         }
 
         fun findBoundingBoxForMatch(matchedText: String): Rect? {
-            // Find element containing the matched text
-            // Try exact substring then fallback to any element that contains part
+            if (elements.isEmpty()) return null
+            val cleanedMatch = matchedText.trim()
+            if (cleanedMatch.isEmpty()) return null
+
+            // 1) Exact: element contains full matched text
             for (el in elements) {
-                if (el.text.contains(matchedText)) {
-                    return el.boundingBox
+                if (el.text.contains(cleanedMatch)) {
+                    return el.boundingBox?.let { Rect(it) }
                 }
             }
-            // Try cleaned match
-            val cleaned = matchedText.trim()
+            // 2) Aggregate: collect all elements whose text is contained within matchedText (split OCR)
+            val candidateBoxes = mutableListOf<Rect>()
             for (el in elements) {
-                if (cleaned.isNotEmpty() && el.text.contains(cleaned.take(8))) {
-                    return el.boundingBox
+                val t = el.text.trim()
+                if (t.length < 2) continue
+                // If matchedText contains this element's text, it's part of the sensitive region
+                if (cleanedMatch.contains(t) || t.contains(cleanedMatch.take(12))) {
+                    el.boundingBox?.let { candidateBoxes.add(Rect(it)) }
                 }
             }
-            // Fallback: find element whose text is substring of surrounding
-            for (el in elements) {
-                if (fullText.contains(el.text) && el.text.length > 3) {
-                    // not reliable but return first
+            if (candidateBoxes.isNotEmpty()) {
+                // Union all candidate boxes into one
+                var left = candidateBoxes.minOf { it.left }
+                var top = candidateBoxes.minOf { it.top }
+                var right = candidateBoxes.maxOf { it.right }
+                var bottom = candidateBoxes.maxOf { it.bottom }
+                // Also handle case where matchedText spans multiple lines — ensure width covers full
+                // If union is too tall (> 3x min height), treat as multi-line and keep union
+                return Rect(left, top, right, bottom)
+            }
+            // 3) Fallback: element contains first 8 chars of match
+            val prefix = cleanedMatch.take(8)
+            if (prefix.isNotEmpty()) {
+                for (el in elements) {
+                    if (el.text.contains(prefix)) {
+                        return el.boundingBox?.let { Rect(it) }
+                    }
                 }
             }
             return null

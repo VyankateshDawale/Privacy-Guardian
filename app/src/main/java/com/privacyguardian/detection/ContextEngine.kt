@@ -12,8 +12,7 @@ object ContextEngine {
     )
 
     private val exampleIndicators = listOf(
-        "example", "sample", "placeholder", "your_key_here", "your_api_key",
-        "xxx", "xxxx", "test_key", "dummy", "fake"
+        "your_key_here", "your_api_key", "your_secret", "placeholder", "dummy", "sample", "test_key", "fake"
     )
 
     private val productionIndicators = listOf(
@@ -41,21 +40,34 @@ object ContextEngine {
         val isSensitiveExampleType = detectedType in setOf(SensitiveType.API_KEY, SensitiveType.AWS_ACCESS_KEY, SensitiveType.AWS_SECRET_KEY, SensitiveType.PASSWORD, SensitiveType.SECRET, SensitiveType.JWT, SensitiveType.DATABASE_URL)
         val isEmailOrPhone = detectedType in setOf(SensitiveType.EMAIL, SensitiveType.PHONE)
 
-        // Example / documentation detection
+        // Example / documentation detection — only true placeholder, not domain example.com
+        // For demo file, we want real secrets like AKIA...EXAMPLE to still count as high risk (just slightly reduced)
         val isExample = if (isEmailOrPhone) {
-            // For email/phone, only treat as example if explicitly placeholder-like YOUR, XXX
             valueLower.contains("your_") || valueLower.contains("your-") || valueLower.contains("xxx") || lower.contains("your_key_here") || lower.contains("placeholder")
         } else {
-            exampleIndicators.any { lower.contains(it) || valueLower.contains(it) } ||
-                    valueLower.contains("your_") ||
-                    valueLower.contains("example")
+            // Only explicit placeholders in value or surrounding, not bare 'example' substring from example.com
+            val placeholderInValue = valueLower == "your_key_here" || valueLower == "your_api_key" || valueLower.contains("your_key_here") && valueLower.length < 30
+            val explicitPlaceholder = placeholderInValue || valueLower == "xxx" || valueLower == "dummy" || valueLower.contains("placeholder")
+            val surroundingPlaceholder = exampleIndicators.any { lower.contains(it) }
+            // Special case: AWS example key AKIA...EXAMPLE — treat as demo secret, keep high risk (slight penalty)
+            val awsExample = detectedType == SensitiveType.AWS_ACCESS_KEY && valueLower.contains("example")
+            if (awsExample) {
+                // Demo: keep detection but slightly lower risk so vẫn critical
+                return ContextResult(true, 0.85f, -10, "Demo / example key")
+            }
+            // DATABASE_URL with example.com should NOT be considered example — keep critical
+            if (detectedType == SensitiveType.DATABASE_URL && valueLower.contains("example.com")) {
+                false
+            } else {
+                explicitPlaceholder || surroundingPlaceholder || (valueLower.contains("your_") && valueLower.length < 30)
+            }
         }
 
         if (isExample) {
             return ContextResult(
                 isExample = true,
-                confidenceMultiplier = 0.3f,
-                riskAdjustment = -40,
+                confidenceMultiplier = 0.7f,
+                riskAdjustment = -15,
                 contextLabel = "Example / documentation"
             )
         }
