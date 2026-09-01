@@ -1,4 +1,4 @@
-﻿package com.privacyguardian.ui.guardian
+package com.privacyguardian.ui.guardian
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -159,6 +159,18 @@ fun GuardianScreen(app: PrivacyGuardianApp, scanViewModel: ScanViewModel, onNavi
                                     Text(e.maskedValue, color = TextSecondary, fontSize = 11.sp)
                                 }
                             }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(
+                                onClick = {
+                                    var sanitized = developerText
+                                    localResult!!.detectedEntities.forEach { e -> sanitized = sanitized.replace(e.originalValue, e.maskedValue) }
+                                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("sanitized", sanitized))
+                                    Toast.makeText(context, "Poisoned data copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = AccentIqoo, contentColor = Color.White)
+                            ) { Text("INJECT & COPY TO CLIPBOARD", fontWeight = FontWeight.Bold) }
                         }
                     }
                 }
