@@ -144,32 +144,19 @@ object ContextEngine {
 
     fun maskingFor(type: SensitiveType, value: String): String {
         return when (type) {
-            SensitiveType.API_KEY -> {
-                if (value.length <= 8) "********"
-                else value.take(8) + "********"
-            }
-            SensitiveType.AWS_ACCESS_KEY -> "AKIA****************"
-            SensitiveType.AWS_SECRET_KEY -> "********************"
-            SensitiveType.JWT -> "eyJ********.********.********"
-            SensitiveType.PASSWORD -> "*".repeat(value.length.coerceIn(8, 16))
-            SensitiveType.SECRET -> "*".repeat(value.length.coerceIn(8, 16))
-            SensitiveType.DATABASE_URL -> "postgres://***:***@***"
-            SensitiveType.OTP -> "*".repeat(value.length)
-            SensitiveType.BANK_CARD -> "**** **** **** " + value.filter { it.isDigit() }.takeLast(4)
-            SensitiveType.GOV_ID -> "**** **** " + value.filter { it.isDigit() }.takeLast(4)
-            SensitiveType.PHONE -> {
-                val digits = value.filter { it.isDigit() }
-                if (digits.length >= 4) "******" + digits.takeLast(4) else "******"
-            }
-            SensitiveType.EMAIL -> {
-                val parts = value.split("@")
-                if (parts.size == 2) {
-                    val user = parts[0]
-                    val maskedUser = if (user.length <= 1) "*" else user.first() + "***"
-                    "$maskedUser@${parts[1]}"
-                } else "u***@example.com"
-            }
-            SensitiveType.ADDRESS -> "**** Address ****"
+            SensitiveType.API_KEY -> "sk_live_" + java.util.UUID.randomUUID().toString().replace("-", "").take(24)
+            SensitiveType.AWS_ACCESS_KEY -> "AKIA" + (1..16).map { ('A'..'Z').random() }.joinToString("")
+            SensitiveType.AWS_SECRET_KEY -> (1..40).map { (('a'..'z') + ('A'..'Z') + ('0'..'9')).random() }.joinToString("")
+            SensitiveType.JWT -> "eyJhbGciOiJIUzI1NiJ9." + (1..32).map { (('a'..'z') + ('A'..'Z') + ('0'..'9')).random() }.joinToString("") + ".ghost_signature"
+            SensitiveType.PASSWORD -> (1..12).map { (('a'..'z') + ('A'..'Z') + ('0'..'9') + listOf('!','@','#','$')).random() }.joinToString("")
+            SensitiveType.SECRET -> (1..16).map { (('a'..'z') + ('A'..'Z') + ('0'..'9')).random() }.joinToString("")
+            SensitiveType.DATABASE_URL -> "postgres://ghost_user:" + (1..10).map{('a'..'z').random()}.joinToString("") + "@127.0.0.1:5432/ghost_db"
+            SensitiveType.OTP -> (1..6).map { ('0'..'9').random() }.joinToString("")
+            SensitiveType.BANK_CARD -> "4111 1111 1111 " + (1000..9999).random().toString()
+            SensitiveType.GOV_ID -> "999-00-" + (1000..9999).random().toString()
+            SensitiveType.PHONE -> "+1 (555) 019-" + (1000..9999).random().toString()
+            SensitiveType.EMAIL -> "ghost_" + (1000..9999).random().toString() + "@anon.local"
+            else -> "[REDACTED]"
         }
     }
 }

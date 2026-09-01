@@ -438,6 +438,27 @@ fun ResultScreen(
                 }
             }
 
+            // Location Scrubber Badge
+            if (state.locationStripped) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = SafeLight.copy(alpha = 0.1f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Safe.copy(alpha = 0.4f))
+                    ) {
+                        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.LocationOff, contentDescription = null, tint = Safe)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text("GPS Metadata Stripped", color = Safe, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Text("EXIF location data was removed to protect your physical privacy.", color = TextSecondary, fontSize = 11.sp)
+                            }
+                        }
+                    }
+                }
+            }
+
             // NPU Diagnostics Card (iQOO 15 specific)
             item {
                 Card(

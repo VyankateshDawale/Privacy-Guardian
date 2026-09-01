@@ -89,6 +89,35 @@ fun HomeScreen(
                     onNavigate(Screen.Result.route)
                 })
             }
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).clickable {
+                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                            clipboard.clearPrimaryClip()
+                        } else {
+                            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("", ""))
+                        }
+                        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            app?.scanHistoryRepository?.clearAll()
+                        }
+                        android.widget.Toast.makeText(context, "PANIC PROTOCOL ENGAGED: Clipboard Cleared & DB Wiped", android.widget.Toast.LENGTH_LONG).show()
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Critical.copy(alpha = 0.1f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Critical.copy(alpha = 0.5f))
+                ) {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Warning, contentDescription = null, tint = Critical, modifier = Modifier.size(32.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("PANIC PROTOCOL", color = Critical, fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 1.sp)
+                            Text("1-Tap Wipe: Clears clipboard & local history", color = TextSecondary, fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
+
             item { SectionHeader("Quick Actions") }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

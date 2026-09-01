@@ -38,7 +38,8 @@ data class ScanUiState(
     val riskResult: PrivacyRiskResult? = null,
     val protectedBitmap: Bitmap? = null,
     val protectedUri: Uri? = null,
-    val stage: String = "Idle"
+    val stage: String = "Idle",
+    val locationStripped: Boolean = false
 )
 
 class ScanViewModel : ViewModel() {
@@ -371,10 +372,19 @@ class ScanViewModel : ViewModel() {
 
     fun scanUri(context: Context, uri: Uri) {
         viewModelScope.launch {
+            var hasLocation = false
+            try {
+                context.contentResolver.openInputStream(uri)?.use { stream ->
+                    val exif = androidx.exifinterface.media.ExifInterface(stream)
+                    val lat = exif.getAttribute(androidx.exifinterface.media.ExifInterface.TAG_GPS_LATITUDE)
+                    if (lat != null) hasLocation = true
+                }
+            } catch (e: Exception) { }
+
             _state.value = _state.value.copy(
                 isLoading = true, stage = "Loading image", error = null,
                 ocrResult = null, riskResult = null, protectedBitmap = null, protectedUri = null,
-                originalBitmap = null, originalUri = null
+                originalBitmap = null, originalUri = null, locationStripped = hasLocation
             )
             val bmp = loadBitmap(context, uri)
             if (bmp == null) {
@@ -390,7 +400,7 @@ class ScanViewModel : ViewModel() {
             _state.value = _state.value.copy(
                 isLoading = true, stage = "Analyzing text", error = null,
                 ocrResult = null, riskResult = null, protectedBitmap = null, protectedUri = null,
-                originalBitmap = null, originalUri = null
+                originalBitmap = null, originalUri = null, locationStripped = false
             )
             try {
                 val pseudoElements = text.split("\n").map { OcrElement(it, null) }
@@ -431,7 +441,7 @@ class ScanViewModel : ViewModel() {
             _state.value = _state.value.copy(
                 isLoading = true, stage = "Loading demo", error = null,
                 ocrResult = null, riskResult = null, protectedBitmap = null, protectedUri = null,
-                originalBitmap = null, originalUri = null
+                originalBitmap = null, originalUri = null, locationStripped = false
             )
             val bmp = withContext(Dispatchers.IO) { generateOrLoadDemoBitmap(context) }
             _state.value = _state.value.copy(originalBitmap = bmp)
