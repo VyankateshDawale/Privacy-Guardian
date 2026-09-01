@@ -1,47 +1,40 @@
 package com.privacyguardian.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
+private val LightColorScheme = lightColorScheme(
     primary = Safe,
-    onPrimary = Color.Black,
-    primaryContainer = CardElevated,
+    onPrimary = Color.White,
+    primaryContainer = SafeLight,
     onPrimaryContainer = TextPrimary,
-    secondary = TextSecondary,
-    tertiary = Warning,
+    secondary = AccentBlue,
+    onSecondary = Color.White,
+    tertiary = AccentPurple,
+    onTertiary = Color.White,
     error = Critical,
+    onError = Color.White,
     background = Background,
     onBackground = TextPrimary,
     surface = Background,
     onSurface = TextPrimary,
-    surfaceVariant = Card,
+    surfaceVariant = CardElevated,
     onSurfaceVariant = TextSecondary,
-    outline = Border
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Safe,
-    onPrimary = Color.White,
-    background = Background,
-    onBackground = TextPrimary,
-    surface = Card,
-    onSurface = TextPrimary,
+    outline = Border,
+    outlineVariant = BorderStrong,
+    scrim = Color(0x990F172A)
 )
 
 @Composable
 fun PrivacyGuardianTheme(
-    darkTheme: Boolean = true,
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
+    // Force white professional theme for demo — darkTheme param ignored for flagship light look
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = LightColorScheme,
         typography = Typography,
         content = content
     )

@@ -74,28 +74,12 @@ fun HomeScreen(
                     Text("Fast • Private • On-device", color = TextTertiary, fontSize = 11.sp)
                 }
             }
-            // LIVE DEMO prominent
+            // LIVE DEMO — crazy gradient animated card
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth().clickable {
-                        scanViewModel.scanDemo(context)
-                        onNavigate(Screen.Result.route)
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Safe)
-                ) {
-                    Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.Bolt, contentDescription = null, tint = Color.Black, modifier = Modifier.size(28.dp))
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("⚡ LIVE DEMO", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            Text("Run real OCR + detection on demo image", color = Color.Black.copy(alpha = 0.7f), fontSize = 12.sp)
-                        }
-                        Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black)
-                    }
-                }
+                CrazyLiveDemoCard(onClick = {
+                    scanViewModel.scanDemo(context)
+                    onNavigate(Screen.Result.route)
+                })
             }
             item { SectionHeader("Quick Actions") }
             item {

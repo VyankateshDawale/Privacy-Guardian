@@ -122,14 +122,20 @@ class SensitiveDataDetector {
                     // We already prioritize OTP
                 }
 
-                // If isExample and baseRisk lowered significantly, demote to low risk and maybe skip for API keys with placeholder
+                // Example handling: don't skip outright — lower risk but keep for demo.
+                // Only skip exact placeholder tokens like YOUR_KEY_HERE (not domain example.com)
                 if (ctx.isExample) {
-                    // For placeholder values like YOUR_KEY_HERE, skip critical
-                    if (matchedValue.contains("YOUR", ignoreCase = true) || matchedValue.contains("EXAMPLE", ignoreCase = true)) {
+                    val isExactPlaceholder = matchedValue.equals("YOUR_KEY_HERE", ignoreCase = true) ||
+                            matchedValue.equals("YOUR_SECRET_HERE", ignoreCase = true) ||
+                            matchedValue.equals("YOUR_API_KEY_HERE", ignoreCase = true) ||
+                            matchedValue.equals("EXAMPLE", ignoreCase = true) ||
+                            matchedValue.equals("YOUR_KEY_HERE\"", ignoreCase = true)
+                    if (isExactPlaceholder) {
                         continue
                     }
-                    // Otherwise keep but with reduced risk
-                    if (baseRisk < 30) continue // not worth reporting as sensitive
+                    // For demo data like AKIA...EXAMPLE or postgres://...example.com — keep but with reduced risk
+                    // Don't skip database URLs or AWS keys that contain example as part of demo
+                    if (baseRisk < 20) continue // only skip very low after reduction
                 }
 
                 // Determine masked value
@@ -170,14 +176,20 @@ class SensitiveDataDetector {
             }
         }
 
-        // Post-process: if we have both PHONE and BANK_CARD for same value, prefer BANK_CARD if Luhn valid
-        // Also de-duplicate OTP vs PHONE: if OTP exists, remove phone that matches same 6-digit?
-        // Remove phone entities that equal OTP value
+        // Post-process: dedup OTP vs PHONE, and EMAIL inside DATABASE_URL
         val otpValues = entities.filter { it.type == com.privacyguardian.domain.model.SensitiveType.OTP }.map { it.originalValue.filter { c -> c.isDigit() } }.toSet()
         if (otpValues.isNotEmpty()) {
             entities.removeAll { e ->
                 e.type == com.privacyguardian.domain.model.SensitiveType.PHONE &&
                         e.originalValue.filter { it.isDigit() } in otpValues
+            }
+        }
+        // If DATABASE_URL exists, suppress EMAIL that is actually part of the URL (e.g., SuperSecret123@db.example.com)
+        val dbUrls = entities.filter { it.type == com.privacyguardian.domain.model.SensitiveType.DATABASE_URL }.map { it.originalValue }
+        if (dbUrls.isNotEmpty()) {
+            entities.removeAll { e ->
+                e.type == com.privacyguardian.domain.model.SensitiveType.EMAIL &&
+                        dbUrls.any { url -> url.contains(e.originalValue) }
             }
         }
 
