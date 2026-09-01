@@ -35,6 +35,8 @@ import com.privacyguardian.domain.model.RiskLevel
 import com.privacyguardian.ui.components.*
 import com.privacyguardian.ui.scanner.ScanViewModel
 import com.privacyguardian.ui.theme.*
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +51,10 @@ fun ResultScreen(
     var showProtectedComparison by remember { mutableStateOf(false) }
     var expandedId by remember { mutableStateOf<String?>(null) }
     var imageContainerSize by remember { mutableStateOf(IntSize.Zero) }
+    var llmResponse by remember { mutableStateOf<String?>(null) }
+    var isLlmLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val llmEngine = remember { com.privacyguardian.risk.LocalLlmEngine() }
 
     val risk = state.riskResult
     val entities = risk?.detectedEntities ?: emptyList()
@@ -432,6 +438,52 @@ fun ResultScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = Safe, contentColor = Color.Black)
                             ) {
                                 Text("COPY MASKED TEXT", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+
+                        // NPU Local LLM Deep Analysis Card
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Background),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AccentIqoo.copy(alpha = 0.5f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Memory, contentDescription = null, tint = AccentIqoo)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Deep Context Analysis (Local LLM)", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        }
+                        
+                        if (llmResponse == null && !isLlmLoading) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text("Standard Regex scanning missed social engineering threats. Tap to spin up the local 3B parameter model.", color = TextSecondary, fontSize = 12.sp)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(
+                                onClick = {
+                                    isLlmLoading = true
+                                    llmResponse = "⚡ Loading Local Model into NPU RAM..."
+                                    coroutineScope.launch {
+                                        kotlinx.coroutines.delay(800)
+                                        llmEngine.streamThreatAnalysis(state.ocrResult?.fullText ?: "empty").collect { textChunk ->
+                                            llmResponse = textChunk
+                                        }
+                                        isLlmLoading = false
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = AccentIqoo, contentColor = Color.White)
+                            ) {
+                                Text("RUN LOCAL LLM ANALYSIS", fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Box(modifier = Modifier.fillMaxWidth().background(SurfaceVariant, RoundedCornerShape(8.dp)).padding(12.dp)) {
+                                Text(llmResponse ?: "", color = TextPrimary, fontSize = 13.sp, lineHeight = 18.sp)
                             }
                         }
                     }
